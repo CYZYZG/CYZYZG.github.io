@@ -1,125 +1,14 @@
-## OpenCV————图像处理100问
-### 1.通道交换
-cv2.imread( ) 读入的图片系数是按{BGR}顺序排列的
-```python
-import cv2
-img = cv2.imread("imori.jpg")
-red = img[:, :, 2].copy()  #取出红色通道
-```
-```python
-# Read image
-img = cv2.imread("../imori.jpg")
-# BGR -> RGB
-img = BGR2RGB(img)
-```
-### 2.灰度化
-灰度是一种图像亮度的表示方法，通过下式计算：
-$$
-Y = 0.2126\  R + 0.7152\  G + 0.0722\  B
-$$
-```python
-def BGR2GRAY(img):
-	b = img[:, :, 0].copy()
-	g = img[:, :, 1].copy()
-	r = img[:, :, 2].copy()
-
-	# Gray scale
-	out = 0.2126 * r + 0.7152 * g + 0.0722 * b
-	out = out.astype(np.uint8)
-
-	return out
-```
-### 3.二值化
-$$
-y=
-\begin{cases}
-0& (\text{if}\quad y < 128) \\
-255& (\text{else})
-\end{cases}
-$$
-```python
-#先要进行灰度化变为1通道，然后进行二值化
-def BGR2GRAY(img):
-    b = img[:, :, 0].copy()
-    g = img[:, :, 1].copy()
-    r = img[:, :, 2].copy()
-
-    # Gray scale
-    out = 0.2126 * r + 0.7152 * g + 0.0722 * b
-    out = out.astype(np.uint8)
-    return out
-
-# binalization
-def binarization(img, th=128):
-    img[img < th] = 0
-    img[img >= th] = 255
-    return img
-
-# Read image
-img = cv2.imread("../imori.jpg").astype(np.float32)
-
-# Grayscale
-out = BGR2GRAY(img)
-
-# Binarization
-out = binarization(out)
-```
-### 4.大津二值化算法
-大津算法，也被称作最大类间方差法，是一种可以自动确定二值化中阈值的算法。
-从**类内方差**和**类间方差**的比值计算得来：
-
-
-- 小于阈值$t$的类记作$0$，大于阈值$t$的类记作$1$；
-- $w_0$和$w_1$是被阈值$t$分开的两个类中的像素数占总像素数的比率（满足$w_0+w_1=1$）；
-- ${S_0}^2$， ${S_1}^2$是这两个类中像素值的方差；
-- $M_0$，$M_1$是这两个类的像素值的平均值；
-
-即：
-
-* 类内方差：${S_w}^2=w_0\ {S_0}^2+w_1\  {S_1}^2$
-* 类间方差：${S_b}^2 = w_0 \  (M_0 - M_t)^2 + w_1\ (M_1 - M_t)^2 = w_0\  w_1\  (M_0 - M_1) ^2$
-* 图像所有像素的方差：${S_t}^2 = {S_w}^2 + {S_b}^2 = \text{常数}$
-
-根据以上的式子，我们用以下的式子计算分离度$X$：[^1]
-
-[^1]: 这里原repo配图里的公式好像打错了。
-
-$$
-X = \frac{{S_b}^2}{{S_w}^2} = \frac{{S_b}^2}{{S_t}^2 - {S_b}^2}
-$$
-
-也就是说： 
-$$
-\arg\max\limits_{t}\ X=\arg\max\limits_{t}\ {S_b}^2
-$$
-换言之，如果使${S_b}^2={w_0}\ {w_1}\ (M_0 - M_1)^2$最大，就可以得到最好的二值化阈值$t$。
-```Python
-#先进行灰度化
-#二值化
-def otsu_binarization(img, th=128):
-	max_sigma = 0
-	max_t = 0
-
-	# determine threshold
-	for _t in range(1, 255):
-		v0 = out[np.where(out < _t)]  ##取出小于阈值的像素值
-		m0 = np.mean(v0) if len(v0) > 0 else 0.  #求小于阈值的平均M
-		w0 = len(v0) / (H * W)  #求小于阈值的点占总像素的比例
-		v1 = out[np.where(out >= _t)]
-		m1 = np.mean(v1) if len(v1) > 0 else 0.
-		w1 = len(v1) / (H * W)
-		sigma = w0 * w1 * ((m0 - m1) ** 2)
-		if sigma > max_sigma:  ##记录最大值
-			max_sigma = sigma
-			max_t = _t
-
-	# Binarization
-	print("threshold >>", max_t)
-	th = max_t
-	out[out < th] = 0
-	out[out >= th] = 255
-	return out
-```
+---
+layout:     post
+title:      图像处理100问（三）
+subtitle:   OpenCV
+date:       2020-07-11
+author:     CY
+header-img: img/post-bg-kuaidi.jpg
+catalog: true
+tags:
+    - Opencv
+---
 ### 5.$\text{HSV}$变换
 $\text{HSV}$即使用**色相（Hue）、饱和度（Saturation）、明度（Value）**来表示色彩的一种方式。
 - 色相：将颜色使用$0^{\circ}$到$360^{\circ}$表示，就是平常所说的颜色名称，如红色、蓝色。色相与数值按下表对应：
